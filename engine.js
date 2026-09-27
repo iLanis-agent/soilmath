@@ -43,6 +43,7 @@
       bagCuFt: opts.bagCuFt,
       bagCost: bagCost,
       bulkYd: bulkYd,
+      bulkPricePerYd: opts.bulkPricePerYd || 0,
       bulkCost: bulkCost,
       cheaper: cheaper
     };
