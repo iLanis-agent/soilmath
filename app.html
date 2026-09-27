@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SoilMath - honest raised-bed soil math</title>
+<style>
+  :root { --bg:#131711; --card:#1d2419; --ink:#eff3e8; --dim:#a9b597; --acc:#8fb84f; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding:28px 24px 8px; max-width:980px; margin:0 auto; display:flex; justify-content:space-between; align-items:baseline; }
+  h1 { margin:0; font-size:28px; }
+  h1 span { color:var(--acc); }
+  nav a { color:var(--dim); text-decoration:none; font-size:14px; }
+  main { max-width:980px; margin:0 auto; padding:16px 24px 60px; display:grid; gap:18px; }
+  .card { background:var(--card); border-radius:14px; padding:20px; }
+  .card h2 { margin:0 0 12px; font-size:13px; letter-spacing:1.5px; color:var(--dim); text-transform:uppercase; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
+  label { display:block; font-size:13px; color:var(--dim); margin-bottom:4px; }
+  input, select { width:100%; background:#171d13; border:1px solid #44512f; color:var(--ink); border-radius:8px; padding:9px 10px; font-size:15px; }
+  .hint { font-size:12.5px; color:var(--dim); margin-top:10px; }
+  button { cursor:pointer; border:0; border-radius:9px; padding:11px 16px; font-size:15px; background:var(--acc); color:#1d2a08; font-weight:600; }
+  button.ghost { background:#38442a; color:var(--ink); font-weight:500; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .verdict { font-size:17px; line-height:1.65; }
+  .verdict b { color:var(--acc); }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-top:16px; }
+  .stat { background:#171d13; border-radius:10px; padding:12px; }
+  .stat .v { font-size:19px; font-weight:700; color:var(--acc); }
+  .stat .k { font-size:12px; color:var(--dim); margin-top:2px; }
+  .warn { background:#2b381d; border:1px solid #586f33; border-radius:10px; padding:12px 14px; margin-top:14px; font-size:14px; color:#ddebc2; }
+  table.bd { width:100%; border-collapse:collapse; margin-top:6px; font-size:14.5px; }
+  table.bd td { padding:7px 4px; border-bottom:1px solid #33402a; }
+  table.bd td:last-child { text-align:right; color:var(--acc); font-weight:600; }
+  .fine { font-size:12.5px; color:var(--dim); margin-top:8px; }
+  a { color:var(--acc); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Soil<span>Math</span></h1>
+  <nav><a href="index.html">about</a></nav>
+</header>
+<main>
+  <section class="card">
+    <h2>The beds</h2>
+    <div class="grid">
+      <div>
+        <label for="len">Bed length (ft)</label>
+        <input id="len" type="number" min="1" max="40" step="0.5" value="8">
+      </div>
+      <div>
+        <label for="wid">Bed width (ft)</label>
+        <input id="wid" type="number" min="1" max="12" step="0.5" value="4">
+      </div>
+      <div>
+        <label for="dep">Depth (in)</label>
+        <select id="dep">
+          <option value="6">6 in (greens, herbs)</option>
+          <option value="12" selected>12 in (most vegetables)</option>
+          <option value="18">18 in (root crops)</option>
+          <option value="24">24 in (deep beds)</option>
+        </select>
+      </div>
+      <div>
+        <label for="beds">How many beds</label>
+        <input id="beds" type="number" min="1" max="20" step="1" value="2">
+      </div>
+      <div>
+        <label for="fill">Fill</label>
+        <select id="fill">
+          <option value="full">Full depth with soil</option>
+          <option value="twothirds">Bottom third is wood/logs</option>
+        </select>
+      </div>
+    </div>
+    <p class="hint">Keep beds 4 ft wide or less so you never step in them - compacted soil is the one thing no mix can fix later.</p>
+  </section>
+
+  <section class="card">
+    <h2>The soil</h2>
+    <div class="grid">
+      <div>
+        <label for="mix">Mix</label>
+        <select id="mix">
+          <option value="premium">Premium blend (60% topsoil / 30% compost / 10% aeration)</option>
+          <option value="fiftyfifty">Simple 50/50 (topsoil / compost)</option>
+          <option value="topsoil">Straight topsoil</option>
+        </select>
+      </div>
+      <div>
+        <label for="bagsize">Bag size (cu ft)</label>
+        <select id="bagsize">
+          <option value="1">1 cu ft</option>
+          <option value="1.5" selected>1.5 cu ft</option>
+          <option value="2">2 cu ft</option>
+        </select>
+      </div>
+      <div>
+        <label for="bagprice">$ per bag</label>
+        <input id="bagprice" type="number" min="0" max="60" step="0.5" value="9">
+      </div>
+      <div>
+        <label for="bulkprice">Bulk $ per cu yd (0 = no bulk option)</label>
+        <input id="bulkprice" type="number" min="0" max="300" step="1" value="55">
+      </div>
+    </div>
+    <div class="row">
+      <button id="go">Do the math</button>
+      <button class="ghost" data-preset="starter">First bed</button>
+      <button class="ghost" data-preset="pair">Two 4x8 beds</button>
+      <button class="ghost" data-preset="potager">Little potager</button>
+    </div>
+    <p class="hint">Fresh mix fluffs, then settles about 15% over the first season of watering. The order below already includes that - the bed that looks overfilled in April is exactly full by September.</p>
+  </section>
+
+  <section class="card" id="out" hidden>
+    <h2>Your order</h2>
+    <div class="verdict" id="verdict"></div>
+    <div class="stats" id="stats"></div>
+    <div id="warnbox"></div>
+    <table class="bd" id="breakdown"></table>
+    <p class="fine">Bulk soil is sold by the cubic yard and delivered loose - you want a tarp down before the truck arrives, and a plan for the pile if it rains. Bags cost more but keep, stack, and fit in a car trunk.</p>
+  </section>
+
+  <section class="card">
+    <h2>What the bag will not tell you</h2>
+    <table class="bd">
+      <tr><td>A yard is 27 cubic feet</td><td>that "1 cu ft" bag needs 27 friends to equal one scoop from the landscape yard - bulk is often a third of the bag price per volume</td></tr>
+      <tr><td>Settling is not a defect</td><td>fluffy new mix loses about 15% of its volume; ordering exactly the bed's volume guarantees a half-empty bed by fall</td></tr>
+      <tr><td>Topsoil is not one thing</td><td>cheap bulk "topsoil" can be subsoil and clay; ask to see the pile, and walk away from anything that smells sour</td></tr>
+      <tr><td>Deep beds do not need deep soil</td><td>an 18 in bed grows fine with logs and branches in the bottom third - it saves real money and feeds the bed as it breaks down</td></tr>
+      <tr><td>Compost is the engine, not the filler</td><td>past about a third compost, most beds get too rich and stay too wet; more is not more</td></tr>
+      <tr><td>Never work wet soil</td><td>if a squeezed handful holds a shiny ball, wait - tilling wet soil makes bricks that take years to undo</td></tr>
+    </table>
+  </section>
+</main>
+<script src="engine.js"></script>
+<script>
+(function () {
+  function val(id) { return document.getElementById(id).value; }
+  function num(id) { return parseFloat(val(id)) || 0; }
+  function money(x) { return '$' + x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmt(x) { return x.toLocaleString('en-US', { maximumFractionDigits: 2 }); }
+
+  function render() {
+    var p = SoilMath.plan({
+      lengthFt: num('len'), widthFt: num('wid'), depthIn: num('dep'),
+      beds: Math.max(1, parseInt(val('beds'), 10) || 1), fill: val('fill'),
+      mix: val('mix'), bagCuFt: num('bagsize'),
+      bagPrice: num('bagprice'), bulkPricePerYd: num('bulkprice')
+    });
+    if (!(p.netCuFt > 0)) { document.getElementById('out').hidden = true; return; }
+
+    var bulkBit = p.bulkPricePerYd > 0
+      ? ' or <b>' + fmt(p.bulkYd) + ' cu yd</b> bulk for ' + money(p.bulkCost)
+      : '';
+    document.getElementById('verdict').innerHTML =
+      'You need <b>' + fmt(p.orderCuFt) + ' cu ft</b> of mix (settling included): <b>' + p.totalBags +
+      ' bags</b> of ' + fmt(p.bagCuFt) + ' cu ft for ' + money(p.bagCost) + bulkBit + '.';
+
+    var stats = [
+      ['Mix to order', fmt(p.orderCuFt) + ' cu ft'],
+      ['In bags', p.totalBags + ' x ' + fmt(p.bagCuFt) + ' cu ft'],
+      ['Bag cost', money(p.bagCost)],
+      ['Bulk', fmt(p.bulkYd) + ' cu yd'],
+      ['Bulk cost', p.bulkPricePerYd > 0 ? money(p.bulkCost) : 'n/a'],
+      ['Cheaper way', p.cheaper ? p.cheaper : 'n/a']
+    ];
+    document.getElementById('stats').innerHTML = stats.map(function (s) {
+      return '<div class="stat"><div class="v">' + s[1] + '</div><div class="k">' + s[0] + '</div></div>';
+    }).join('');
+
+    var warns = [];
+    if (p.cheaper === 'bulk')
+      warns.push('Bulk wins here: <b>' + money(p.bulkCost) + '</b> delivered vs ' + money(p.bagCost) + ' in bags. It only stays a win if the pile gets used the same week - a tarp and a wheelbarrow are part of the price.');
+    if (p.cheaper === 'bags')
+      warns.push('Bags win at this scale: ' + money(p.bagCost) + ' vs a ' + fmt(p.bulkYd) + ' yd minimum bulk order. Small jobs do not earn a delivery truck.');
+    if (p.orderCuFt >= 54)
+      warns.push('More than two cubic yards of soil - this is a wheelbarrow-and-a-friend afternoon, not a tote-bag errand. Schedule the delivery for a day you can move it.');
+    document.getElementById('warnbox').innerHTML = warns.map(function (w) {
+      return '<div class="warn">' + w + '</div>';
+    }).join('');
+
+    var rows = p.comps.map(function (c) {
+      return [c.name + ' (' + fmt(c.cuft) + ' cu ft)', c.bags + ' bags'];
+    });
+    rows.push(['Total in bags', money(p.bagCost)]);
+    if (p.bulkPricePerYd > 0) rows.push(['Or bulk (' + fmt(p.bulkYd) + ' cu yd)', money(p.bulkCost)]);
+    document.getElementById('breakdown').innerHTML = rows.map(function (r) {
+      return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+    }).join('');
+    document.getElementById('out').hidden = false;
+  }
+
+  var presets = {
+    starter: { len: 4, wid: 4, dep: 12, beds: 1, fill: 'full', mix: 'fiftyfifty', bagsize: 1.5, bagprice: 9, bulkprice: 55 },
+    pair: { len: 8, wid: 4, dep: 12, beds: 2, fill: 'full', mix: 'premium', bagsize: 1.5, bagprice: 9, bulkprice: 55 },
+    potager: { len: 8, wid: 4, dep: 18, beds: 4, fill: 'twothirds', mix: 'premium', bagsize: 1.5, bagprice: 9, bulkprice: 55 }
+  };
+  function loadPreset(key) {
+    var pr = presets[key];
+    ['len', 'wid', 'dep', 'beds', 'fill', 'mix', 'bagsize', 'bagprice', 'bulkprice'].forEach(function (id) {
+      document.getElementById(id).value = pr[id];
+    });
+    render();
+  }
+
+  document.getElementById('go').addEventListener('click', render);
+  document.querySelectorAll('[data-preset]').forEach(function (b) {
+    b.addEventListener('click', function () { loadPreset(b.getAttribute('data-preset')); });
+  });
+  ['len', 'wid', 'dep', 'beds', 'fill', 'mix', 'bagsize', 'bagprice', 'bulkprice'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', render);
+  });
+
+  loadPreset('pair');
+})();
+</script>
+</body>
+</html>
